@@ -4,7 +4,7 @@ import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
 import { useNavigate } from "react-router-dom";
 
-const API = `${import.meta.env.VITE_API_URL}/api`;
+const API = import.meta.env.VITE_API_URL;
 
 const theme = {
   bg: "#0B0B0B",
@@ -21,13 +21,19 @@ export default function Menu() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios
-      .get(`${API}/api/products`)
-      .then((res) => {
+    const fetchData = async () => {
+      try {
+        const res = await axios.get(`${API}/api/products`);
         setItems(Array.isArray(res.data) ? res.data : []);
-      })
-      .catch(() => setItems([]))
-      .finally(() => setLoading(false));
+      } catch (err) {
+        console.error("Fetch error:", err);
+        setItems([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
   const addToCart = async (p) => {
@@ -42,29 +48,30 @@ export default function Menu() {
         name: p.name,
         price: p.afterPrice,
         image: p.image,
-        stock: p.stock, // ✅ send stock
+        stock: p.stock,
       });
 
       navigate("/cartnew");
     } catch (err) {
-      console.error(err);
+      console.error("Cart error:", err);
       alert("Failed to add to cart");
     }
   };
 
   return (
-    <div
-      className="flex flex-col min-h-screen"
-      style={{ background: theme.bg }}
-    >
-      <Header /> <br /> <br /> <br />
+    <div className="flex flex-col min-h-screen" style={{ background: theme.bg }}>
+      <Header />
+      <br /><br /><br />
+
       <div style={{ padding: 30, flex: 1 }}>
         <h1 style={{ fontSize: 32, fontWeight: 900, color: theme.text }}>
           🎬 SeatServe Menu
         </h1>
 
         {loading && (
-          <p style={{ color: theme.muted, marginTop: 20 }}>Loading menu...</p>
+          <p style={{ color: theme.muted, marginTop: 20 }}>
+            Loading menu...
+          </p>
         )}
 
         {!loading && items.length === 0 && (
@@ -83,7 +90,9 @@ export default function Menu() {
         >
           {items.map((p) => (
             <div key={p._id} style={cardStyle}>
-              {p.stock === 0 && <div style={outOfStockBadge}>Out of Stock</div>}
+              {p.stock === 0 && (
+                <div style={outOfStockBadge}>Out of Stock</div>
+              )}
 
               <img
                 src={`${API}${p.image}`}
@@ -97,7 +106,9 @@ export default function Menu() {
                   {p.category}
                 </span>
 
-                <h3 style={{ margin: "6px 0", color: theme.text }}>{p.name}</h3>
+                <h3 style={{ margin: "6px 0", color: theme.text }}>
+                  {p.name}
+                </h3>
 
                 <p style={{ fontSize: 13, color: theme.muted }}>
                   {p.description}
@@ -112,7 +123,6 @@ export default function Menu() {
                   {p.offer}% OFF
                 </div>
 
-                {/* STOCK INFO */}
                 <div style={{ marginTop: 6 }}>
                   {p.stock > 0 ? (
                     <span style={{ color: theme.muted, fontSize: 12 }}>
@@ -125,7 +135,6 @@ export default function Menu() {
                   )}
                 </div>
 
-                {/* LOW STOCK WARNING */}
                 {p.stock > 0 && p.stock <= 5 && (
                   <div style={lowStock}>Only {p.stock} left 🔥</div>
                 )}
@@ -146,6 +155,7 @@ export default function Menu() {
           ))}
         </div>
       </div>
+
       <Footer />
     </div>
   );
