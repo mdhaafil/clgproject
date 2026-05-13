@@ -4,7 +4,7 @@ import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
 import { useNavigate } from "react-router-dom";
 
-const API = "http://localhost:5000";
+const API = `${import.meta.env.VITE_API_URL}/api`;
 
 const theme = {
   bg: "#0B0B0B",

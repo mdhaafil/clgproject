@@ -4,7 +4,7 @@ import axios from "axios";
 
 export default function Register() {
   const navigate = useNavigate();
-
+  const API = `${import.meta.env.VITE_API_URL}/api`;
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -28,7 +28,7 @@ export default function Register() {
     }
 
     try {
-      const res = await axios.post("http://localhost:5000/auth/register", {
+      const res = await axios.post(`${API}/auth/register`, {
         name: formData.name,
         email: formData.email,
         password: formData.password,

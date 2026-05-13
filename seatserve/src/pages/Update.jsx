@@ -6,11 +6,13 @@ import Back from "../components/Back.jsx";
 const Update = () => {
   const [products, setProducts] = useState([]);
   const navigate = useNavigate();
+  const API = `${import.meta.env.VITE_API_URL}/api`;
+
 
   // 📥 Fetch products
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/products")
+      .get(`${API}/products`)
       .then((res) => setProducts(res.data))
       .catch((err) => console.error(err));
   }, []);
@@ -24,7 +26,7 @@ const Update = () => {
     if (!confirmDelete) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/products/${id}`);
+      await axios.delete(`${API}/products/${id}`);
 
       // remove from UI
       setProducts(products.filter((p) => p._id !== id));

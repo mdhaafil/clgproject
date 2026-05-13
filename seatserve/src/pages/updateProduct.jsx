@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Back from "../components/Back.jsx";
 
-const API = "http://localhost:5000";
+const API = `${import.meta.env.VITE_API_URL}/api`;
+
 
 export default function UpdateProduct() {
   const { id } = useParams();

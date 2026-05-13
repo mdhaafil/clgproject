@@ -11,6 +11,7 @@ const theme = {
   text: "#FFFFFF",
   muted: "#B3B3B3",
 };
+const API = `${import.meta.env.VITE_API_URL}/api`;
 
 export default function Contact() {
   const [form, setForm] = useState({
@@ -35,7 +36,7 @@ export default function Contact() {
     setError("");
 
     try {
-      await axios.post("http://localhost:5000/contact", form);
+      await axios.post(`${API}/contact`, form);
       setSuccess("✅ Your query has been submitted!");
       setForm({ name: "", phone: "", email: "", message: "" });
     } catch (err) {

@@ -2,7 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import Back from "../components/Back.jsx";
 
-const API = "http://localhost:5000";
+const API = `${import.meta.env.VITE_API_URL}/api`;
 
 export default function AddProduct() {
   const [form, setForm] = useState({

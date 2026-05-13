@@ -3,7 +3,8 @@ import axios from "axios";
 import { useParams } from "react-router-dom";
 import Back from "../components/Back.jsx";
 
-const API = "http://localhost:5000";
+const API = `${import.meta.env.VITE_API_URL}/api`;
+
 const steps = ["preparing", "on_the_way", "delivered"];
 
 export default function TrackOrder() {

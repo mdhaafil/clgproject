@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import Back from "../components/Back.jsx";
 
-const API = "http://localhost:5000";
+const API = `${import.meta.env.VITE_API_URL}/api`;
 
 export default function Login() {
   const [email, setEmail] = useState("");

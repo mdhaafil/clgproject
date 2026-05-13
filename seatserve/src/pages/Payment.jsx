@@ -11,7 +11,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
-const API = "http://localhost:5000";
+const API = `${import.meta.env.VITE_API_URL}/api`;
 
 /* ================= CHECKOUT ================= */
 
@@ -89,7 +89,7 @@ function CheckoutForm() {
     if (paymentIntent.status === "succeeded") {
       alert("Payment successful!");
 
-      const res = await axios.post("http://localhost:5000/payment/confirm", {
+      const res = await axios.post(`${API}/payment/confirm`, {
         paymentIntentId: paymentIntent.id,
       });
 
