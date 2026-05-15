@@ -4,7 +4,7 @@ import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
 import { useNavigate } from "react-router-dom";
 
-const API = `${import.meta.env.VITE_API_URL}/api`;
+const API = import.meta.env.VITE_API_URL;
 
 const theme = {
   bg: "#0B0B0B",
@@ -18,6 +18,7 @@ const theme = {
 export default function Cart() {
   const [cart, setCart] = useState([]);
   const [loading, setLoading] = useState(true);
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -25,9 +26,16 @@ export default function Cart() {
   }, []);
 
   const fetchCart = async () => {
-    const res = await axios.get(`${API}/cart`);
-    setCart(res.data);
-    setLoading(false);
+    try {
+      const res = await axios.get(`${API}/cart`);
+
+      setCart(Array.isArray(res.data) ? res.data : []);
+    } catch (err) {
+      console.error("Cart fetch failed:", err);
+      setCart([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const updateQty = async (item, qty) => {
@@ -47,24 +55,37 @@ export default function Cart() {
 
       fetchCart();
     } catch (err) {
-      console.error("Qty update failed", err);
+      console.error("Qty update failed:", err);
     }
   };
 
-  const total = cart.reduce((sum, i) => sum + i.price * i.quantity, 0);
+  const total = cart.reduce(
+    (sum, i) => sum + i.price * i.quantity,
+    0
+  );
 
   return (
     <div style={{ background: theme.bg, minHeight: "100vh" }}>
-      <Header /> <br /> <br />
+      <Header />
+
+      <br />
+      <br />
+
       <div style={{ padding: 30, maxWidth: 900, margin: "auto" }}>
         <h1 style={{ color: theme.text, fontSize: 32, fontWeight: 900 }}>
           🛒 Your Cart
         </h1>
 
-        {loading && <p style={{ color: theme.muted }}>Loading cart...</p>}
+        {loading && (
+          <p style={{ color: theme.muted }}>
+            Loading cart...
+          </p>
+        )}
 
         {!loading && cart.length === 0 && (
-          <p style={{ color: theme.muted }}>Your cart is empty</p>
+          <p style={{ color: theme.muted }}>
+            Your cart is empty
+          </p>
         )}
 
         {cart.map((item) => (
@@ -73,33 +94,61 @@ export default function Cart() {
               src={`${API}${item.image}`}
               alt={item.name}
               style={imageStyle}
+              onError={(e) => {
+                e.currentTarget.style.display = "none";
+              }}
             />
 
             <div style={{ flex: 1 }}>
-              <h3 style={{ color: theme.text }}>{item.name}</h3>
+              <h3 style={{ color: theme.text }}>
+                {item.name}
+              </h3>
 
-              <p style={{ color: theme.secondary, fontWeight: 700 }}>
+              <p
+                style={{
+                  color: theme.secondary,
+                  fontWeight: 700,
+                }}
+              >
                 ₹{item.price}
               </p>
 
-              <p style={{ color: theme.muted, fontSize: 12 }}>
+              <p
+                style={{
+                  color: theme.muted,
+                  fontSize: 12,
+                }}
+              >
                 Available: {item.stock}
               </p>
 
               <div style={qtyBox}>
-                <button onClick={() => updateQty(item, item.quantity - 1)}>
+                <button
+                  onClick={() =>
+                    updateQty(item, item.quantity - 1)
+                  }
+                >
                   −
                 </button>
 
                 <span>{item.quantity}</span>
 
-                <button onClick={() => updateQty(item, item.quantity + 1)}>
+                <button
+                  onClick={() =>
+                    updateQty(item, item.quantity + 1)
+                  }
+                >
                   +
                 </button>
               </div>
             </div>
 
-            <div style={{ color: theme.text, fontWeight: 700 }}>
+            <div
+              style={{
+                color: theme.text,
+                fontWeight: 700,
+              }}
+            >
               ₹{item.price * item.quantity}
             </div>
           </div>
@@ -118,6 +167,7 @@ export default function Cart() {
           </div>
         )}
       </div>
+
       <Footer />
     </div>
   );

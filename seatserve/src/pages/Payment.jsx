@@ -5,19 +5,23 @@ import {
   useStripe,
   useElements,
 } from "@stripe/react-stripe-js";
+
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useLocation, useNavigate } from "react-router-dom";
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+const stripePromise = loadStripe(
+  import.meta.env.VITE_STRIPE_PUBLIC_KEY
+);
 
-const API = `${import.meta.env.VITE_API_URL}/api`;
+const API = import.meta.env.VITE_API_URL;
 
 /* ================= CHECKOUT ================= */
 
 function CheckoutForm() {
   const stripe = useStripe();
   const elements = useElements();
+
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -26,38 +30,65 @@ function CheckoutForm() {
   const [email, setEmail] = useState("");
   const [items, setItems] = useState([]);
   const [total, setTotal] = useState(0);
-  const [clientSecret, setClientSecret] = useState("");
+
+  const [clientSecret, setClientSecret] =
+    useState("");
+
   const [loading, setLoading] = useState(false);
-  const [processing, setProcessing] = useState(false);
+
+  const [processing, setProcessing] =
+    useState(false);
 
   useEffect(() => {
-    if (!seats.length) navigate("/");
+    if (!seats.length) {
+      navigate("/");
+    }
   }, []);
 
   /* ================= CREATE PAYMENT ================= */
 
   const initPayment = async () => {
-    if (!email) return alert("Please enter email first");
-    if (!seats.length) return alert("No seats selected");
+    if (!email) {
+      return alert(
+        "Please enter email first"
+      );
+    }
+
+    if (!seats.length) {
+      return alert("No seats selected");
+    }
 
     try {
       setLoading(true);
 
-      const res = await axios.post(`${API}/payment/create`, {
-        seats,
-        email,
-      });
+      const res = await axios.post(
+        `${API}/payment/create`,
+        {
+          seats,
+          email,
+        }
+      );
 
       if (!res.data.clientSecret) {
         alert("Failed to create payment");
         return;
       }
 
-      setClientSecret(res.data.clientSecret);
+      setClientSecret(
+        res.data.clientSecret
+      );
+
       setItems(res.data.items || []);
-      setTotal(Number(res.data.totalAmount || 0));
+
+      setTotal(
+        Number(res.data.totalAmount || 0)
+      );
     } catch (err) {
-      console.error(err);
+      console.error(
+        "Payment init failed:",
+        err
+      );
+
       alert("Failed to prepare payment");
     } finally {
       setLoading(false);
@@ -69,42 +100,85 @@ function CheckoutForm() {
   const payNow = async (e) => {
     e.preventDefault();
 
-    const { paymentIntent, error } = await stripe.confirmCardPayment(
-      clientSecret,
-      {
-        payment_method: {
-          card: elements.getElement(CardElement),
-        },
-      },
-    );
-
-    if (error) {
-      console.log("STRIPE ERROR:", error);
-      alert(error.message);
-      return; // 🚨 VERY IMPORTANT — STOP HERE
+    if (!stripe || !elements) {
+      return;
     }
 
-    console.log("Stripe success:", paymentIntent.status);
+    setProcessing(true);
 
-    if (paymentIntent.status === "succeeded") {
-      alert("Payment successful!");
+    try {
+      const { paymentIntent, error } =
+        await stripe.confirmCardPayment(
+          clientSecret,
+          {
+            payment_method: {
+              card: elements.getElement(
+                CardElement
+              ),
+            },
+          }
+        );
 
-      const res = await axios.post(`${API}/payment/confirm`, {
-        paymentIntentId: paymentIntent.id,
-      });
+      if (error) {
+        console.log(
+          "STRIPE ERROR:",
+          error
+        );
 
-      console.log("Backend response:", res.data);
-      console.log("orderId:", res.data.orderId);
+        alert(error.message);
 
-      navigate(`/receipt/${res.data.orderId}`);
+        setProcessing(false);
+
+        return;
+      }
+
+      console.log(
+        "Stripe success:",
+        paymentIntent.status
+      );
+
+      if (
+        paymentIntent.status === "succeeded"
+      ) {
+        alert("Payment successful!");
+
+        const res = await axios.post(
+          `${API}/payment/confirm`,
+          {
+            paymentIntentId:
+              paymentIntent.id,
+          }
+        );
+
+        console.log(
+          "Backend response:",
+          res.data
+        );
+
+        navigate(
+          `/receipt/${res.data.orderId}`
+        );
+      }
+    } catch (err) {
+      console.error(
+        "Payment confirmation failed:",
+        err
+      );
+
+      alert("Payment failed");
+    } finally {
+      setProcessing(false);
     }
   };
+
   /* ================= UI ================= */
 
   return (
     <form style={card} onSubmit={payNow}>
       <h1 style={title}>
-        {total ? `₹${Number(total).toFixed(2)}` : "Checkout"}
+        {total
+          ? `₹${Number(total).toFixed(2)}`
+          : "Checkout"}
       </h1>
 
       <p style={seatText}>
@@ -116,7 +190,9 @@ function CheckoutForm() {
         placeholder="Enter your email"
         required
         value={email}
-        onChange={(e) => setEmail(e.target.value)}
+        onChange={(e) =>
+          setEmail(e.target.value)
+        }
         style={emailInput}
       />
 
@@ -127,7 +203,9 @@ function CheckoutForm() {
           onClick={initPayment}
           disabled={loading}
         >
-          {loading ? "Preparing..." : "Prepare Payment"}
+          {loading
+            ? "Preparing..."
+            : "Prepare Payment"}
         </button>
       )}
 
@@ -137,9 +215,17 @@ function CheckoutForm() {
             {items.map((item, i) => (
               <div key={i} style={row}>
                 <span>
-                  {item.name} × {item.quantity}
+                  {item.name} ×{" "}
+                  {item.quantity}
                 </span>
-                <span>₹{Number(item.price * item.quantity).toFixed(2)}</span>
+
+                <span>
+                  ₹
+                  {Number(
+                    item.price *
+                      item.quantity
+                  ).toFixed(2)}
+                </span>
               </div>
             ))}
           </div>
@@ -151,21 +237,30 @@ function CheckoutForm() {
                   base: {
                     color: "#fff",
                     fontSize: "16px",
-                    "::placeholder": { color: "#B3B3B3" },
+                    "::placeholder": {
+                      color: "#B3B3B3",
+                    },
                   },
                 },
               }}
             />
           </div>
 
-          <button type="submit" style={payBtn} disabled={processing}>
-            {processing ? "Processing..." : "Pay Now"}
+          <button
+            type="submit"
+            style={payBtn}
+            disabled={processing}
+          >
+            {processing
+              ? "Processing..."
+              : "Pay Now"}
           </button>
         </>
       )}
     </form>
   );
 }
+
 /* ================= PAGE ================= */
 
 export default function PaymentPage() {
@@ -194,7 +289,8 @@ const card = {
   borderRadius: 22,
   width: 420,
   color: "#fff",
-  boxShadow: "0 0 40px rgba(229,9,20,.6)",
+  boxShadow:
+    "0 0 40px rgba(229,9,20,.6)",
 };
 
 const title = {

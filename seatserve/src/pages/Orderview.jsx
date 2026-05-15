@@ -3,7 +3,7 @@ import axios from "axios";
 import { motion } from "framer-motion";
 import Back from "../components/Back.jsx";
 
-const API = `${import.meta.env.VITE_API_URL}/api`;
+const API = import.meta.env.VITE_API_URL;
 
 export default function Orderview() {
   const [orders, setOrders] = useState([]);
@@ -15,14 +15,20 @@ export default function Orderview() {
 
   const fetchOrders = async () => {
     try {
-      const res = await axios.get(`${API}/admin/orders`);
+      const res = await axios.get(
+        `${API}/admin/orders`
+      );
 
       const data = res.data || [];
 
       setOrders(data);
+
       calculateSummary(data);
     } catch (err) {
-      console.log("Fetch all orders error:", err);
+      console.log(
+        "Fetch all orders error:",
+        err
+      );
     }
   };
 
@@ -30,15 +36,26 @@ export default function Orderview() {
 
   const fetchOrdersByDate = async (date) => {
     try {
-      const res = await axios.get(`${API}/admin/orders/date/${date}`);
+      const res = await axios.get(
+        `${API}/admin/orders/date/${date}`
+      );
 
       const data = res.data.orders || [];
 
       setOrders(data);
-      setTotalOrders(res.data.totalOrders || 0);
-      setTotalRevenue(res.data.totalRevenue || 0);
+
+      setTotalOrders(
+        res.data.totalOrders || 0
+      );
+
+      setTotalRevenue(
+        res.data.totalRevenue || 0
+      );
     } catch (err) {
-      console.log("Fetch by date error:", err);
+      console.log(
+        "Fetch by date error:",
+        err
+      );
     }
   };
 
@@ -47,7 +64,12 @@ export default function Orderview() {
   useEffect(() => {
     if (!selectedDate) {
       fetchOrders();
-      const timer = setInterval(fetchOrders, 5000);
+
+      const timer = setInterval(
+        fetchOrders,
+        5000
+      );
+
       return () => clearInterval(timer);
     }
   }, [selectedDate]);
@@ -56,6 +78,7 @@ export default function Orderview() {
 
   const handleDateChange = (e) => {
     const date = e.target.value;
+
     setSelectedDate(date);
 
     if (!date) {
@@ -71,17 +94,20 @@ export default function Orderview() {
     const count = ordersData.length;
 
     const revenue = ordersData.reduce(
-      (sum, order) => sum + (order.totalAmount || 0),
-      0,
+      (sum, order) =>
+        sum + (order.totalAmount || 0),
+      0
     );
 
     setTotalOrders(count);
+
     setTotalRevenue(revenue);
   };
 
   return (
     <div style={page}>
       <Back />
+
       <br />
       <br />
 
@@ -94,6 +120,7 @@ export default function Orderview() {
       </motion.h1>
 
       {/* DATE FILTER + SUMMARY */}
+
       <div style={filterBox}>
         <input
           type="date"
@@ -103,7 +130,10 @@ export default function Orderview() {
         />
 
         <div style={summaryBox}>
-          <span>Total Orders: {totalOrders}</span>
+          <span>
+            Total Orders: {totalOrders}
+          </span>
+
           <span>
             Total Revenue: ₹{" "}
             {new Intl.NumberFormat("en-IN", {
@@ -118,7 +148,9 @@ export default function Orderview() {
 
       <div style={grid}>
         {orders.length === 0 ? (
-          <div style={noOrders}>No orders placed on this date</div>
+          <div style={noOrders}>
+            No orders placed on this date
+          </div>
         ) : (
           orders.map((order, i) => (
             <motion.div
@@ -126,24 +158,40 @@ export default function Orderview() {
               style={card}
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
+              transition={{
+                delay: i * 0.05,
+              }}
               whileHover={{ y: -6 }}
             >
               <div style={cardTop}>
-                <span style={seatTag}>Seat {order.seats?.join(", ")}</span>
-                <Status status={order.foodStatus} />
+                <span style={seatTag}>
+                  Seat{" "}
+                  {order.seats?.join(", ")}
+                </span>
+
+                <Status
+                  status={order.foodStatus}
+                />
               </div>
 
               <div style={items}>
                 {order.items?.map((item) => (
-                  <div key={item._id || item.name} style={itemRow}>
+                  <div
+                    key={item._id || item.name}
+                    style={itemRow}
+                  >
                     <span>{item.name}</span>
-                    <strong>× {item.quantity}</strong>
+
+                    <strong>
+                      × {item.quantity}
+                    </strong>
                   </div>
                 ))}
               </div>
 
-              <div style={total}>₹ {order.totalAmount}</div>
+              <div style={total}>
+                ₹ {order.totalAmount}
+              </div>
             </motion.div>
           ))
         )}
@@ -165,7 +213,8 @@ const Status = ({ status }) => {
     <span
       style={{
         ...statusPill,
-        background: map[status] || "#999",
+        background:
+          map[status] || "#999",
       }}
     >
       {status}
@@ -215,7 +264,8 @@ const summaryBox = {
 
 const grid = {
   display: "grid",
-  gridTemplateColumns: "repeat(auto-fill,minmax(320px,1fr))",
+  gridTemplateColumns:
+    "repeat(auto-fill,minmax(320px,1fr))",
   gap: 24,
 };
 
@@ -231,10 +281,12 @@ const card = {
   background: "gray",
   borderRadius: 20,
   padding: 22,
-  boxShadow: "0 10px 28px rgba(229,9,20,.12)",
+  boxShadow:
+    "0 10px 28px rgba(229,9,20,.12)",
   display: "flex",
   flexDirection: "column",
-  border: "1px solid rgba(229,9,20,.15)",
+  border:
+    "1px solid rgba(229,9,20,.15)",
 };
 
 const cardTop = {

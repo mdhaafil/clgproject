@@ -2,7 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import Back from "../components/Back.jsx";
 
-const API = `${import.meta.env.VITE_API_URL}/api`;
+const API = import.meta.env.VITE_API_URL;
 
 export default function AddProduct() {
   const [form, setForm] = useState({
@@ -12,7 +12,7 @@ export default function AddProduct() {
     beforePrice: "",
     offer: "",
     afterPrice: 0,
-    stock: "", // ✅ STOCK ADDED
+    stock: "",
     image: null,
   });
 
@@ -31,7 +31,12 @@ export default function AddProduct() {
 
     if (name === "beforePrice" || name === "offer") {
       const updated = { ...form, [name]: value };
-      updated.afterPrice = calculatePrice(updated.beforePrice, updated.offer);
+
+      updated.afterPrice = calculatePrice(
+        updated.beforePrice,
+        updated.offer
+      );
+
       setForm(updated);
     } else {
       setForm({ ...form, [name]: value });
@@ -42,12 +47,32 @@ export default function AddProduct() {
     e.preventDefault();
 
     const fd = new FormData();
-    Object.entries(form).forEach(([k, v]) => fd.append(k, v));
+
+    Object.entries(form).forEach(([k, v]) => {
+      fd.append(k, v);
+    });
 
     try {
-      await axios.post(`${API}/api/products`, fd);
-      alert("✅ Product Added With Stock");
-    } catch {
+      await axios.post(`${API}/api/products`, fd, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      alert("✅ Product Added Successfully");
+
+      setForm({
+        name: "",
+        category: "",
+        description: "",
+        beforePrice: "",
+        offer: "",
+        afterPrice: 0,
+        stock: "",
+        image: null,
+      });
+    } catch (err) {
+      console.error("Add Product Error:", err);
       alert("❌ Failed to add product");
     }
   };
@@ -55,6 +80,7 @@ export default function AddProduct() {
   return (
     <div style={{ background: "#0B0B0B", minHeight: "100vh" }}>
       <Back />
+
       <div style={container}>
         <form onSubmit={submit} style={formStyle}>
           <h2 style={{ color: "#E50914" }}>🍿 Add Product</h2>
@@ -62,34 +88,48 @@ export default function AddProduct() {
           <input
             name="name"
             placeholder="Name"
+            value={form.name}
             onChange={handleChange}
             style={inputStyle}
+            required
           />
+
           <input
             name="category"
             placeholder="Category"
+            value={form.category}
             onChange={handleChange}
             style={inputStyle}
+            required
           />
+
           <textarea
             name="description"
             placeholder="Description"
+            value={form.description}
             onChange={handleChange}
             style={inputStyle}
+            required
           />
+
           <input
             type="number"
             name="beforePrice"
             placeholder="Before Price"
+            value={form.beforePrice}
             onChange={handleChange}
             style={inputStyle}
+            required
           />
+
           <input
             type="number"
             name="offer"
             placeholder="Offer %"
+            value={form.offer}
             onChange={handleChange}
             style={inputStyle}
+            required
           />
 
           <input
@@ -98,18 +138,27 @@ export default function AddProduct() {
             style={inputStyle}
           />
 
-          {/* ✅ STOCK FIELD */}
           <input
             type="number"
             name="stock"
             placeholder="Total Stock"
+            value={form.stock}
             onChange={handleChange}
             style={inputStyle}
+            required
           />
 
-          <input type="file" name="image" onChange={handleChange} />
+          <input
+            type="file"
+            name="image"
+            accept="image/*"
+            onChange={handleChange}
+            required
+          />
 
-          <button style={buttonStyle}>Add Product</button>
+          <button style={buttonStyle}>
+            Add Product
+          </button>
         </form>
       </div>
     </div>
@@ -148,4 +197,5 @@ const buttonStyle = {
   borderRadius: 10,
   color: "white",
   cursor: "pointer",
+  fontWeight: "bold",
 };

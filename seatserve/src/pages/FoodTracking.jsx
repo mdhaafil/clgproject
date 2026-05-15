@@ -3,7 +3,7 @@ import axios from "axios";
 import { useParams } from "react-router-dom";
 import Back from "../components/Back.jsx";
 
-const API = `${import.meta.env.VITE_API_URL}/api`;
+const API = import.meta.env.VITE_API_URL;
 
 const steps = ["preparing", "on_the_way", "delivered"];
 
@@ -16,8 +16,11 @@ export default function TrackOrder() {
 
   useEffect(() => {
     animateLoader();
+
     fetchStatus();
+
     const timer = setInterval(fetchStatus, 4000);
+
     return () => clearInterval(timer);
   }, []);
 
@@ -28,10 +31,16 @@ export default function TrackOrder() {
 
   const fetchStatus = async () => {
     try {
-      const res = await axios.get(`${API}/order/track-food/${id}`);
+      const res = await axios.get(
+        `${API}/order/track-food/${id}`
+      );
+
       setStatus(res.data.foodStatus);
+
       setTimeout(() => setLoading(false), 500);
-    } catch {}
+    } catch (err) {
+      console.error("Tracking fetch failed:", err);
+    }
   };
 
   const activeIndex = steps.indexOf(status);
@@ -39,12 +48,15 @@ export default function TrackOrder() {
   return (
     <div>
       <Back />
+
       <div style={page}>
         {loading ? (
           <SeatServeLoader stage={loadingStage} />
         ) : (
           <>
-            <h1 style={title}>Live Order Tracking</h1>
+            <h1 style={title}>
+              Live Order Tracking
+            </h1>
 
             <div style={timeline}>
               {steps.map((s, i) => (
@@ -52,23 +64,34 @@ export default function TrackOrder() {
                   <div
                     style={{
                       ...dot,
-                      background: i <= activeIndex ? "#E50914" : "#444",
+                      background:
+                        i <= activeIndex
+                          ? "#E50914"
+                          : "#444",
                     }}
                   />
+
                   {i < 2 && (
                     <div
                       style={{
                         ...line,
-                        background: i < activeIndex ? "#E50914" : "#333",
+                        background:
+                          i < activeIndex
+                            ? "#E50914"
+                            : "#333",
                       }}
                     />
                   )}
+
                   <p>{s.replace("_", " ")}</p>
                 </div>
               ))}
             </div>
 
-            <div style={statusBox}>🍽 Food is {status.replace("_", " ")}</div>
+            <div style={statusBox}>
+              🍽 Food is{" "}
+              {status?.replace("_", " ")}
+            </div>
           </>
         )}
       </div>
@@ -88,7 +111,10 @@ const SeatServeLoader = ({ stage }) => {
   return (
     <div style={loaderWrap}>
       <div style={ring}></div>
-      <p style={loaderText}>{messages[stage]}</p>
+
+      <p style={loaderText}>
+        {messages[stage]}
+      </p>
     </div>
   );
 };
@@ -170,9 +196,13 @@ const loaderText = {
 /* ================= ANIMATION ================= */
 
 const style = document.createElement("style");
+
 style.innerHTML = `
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 `;
+
 document.head.appendChild(style);

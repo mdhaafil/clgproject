@@ -4,27 +4,40 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import Back from "../components/Back.jsx";
 
-const API = `${import.meta.env.VITE_API_URL}/api`;
+const API = import.meta.env.VITE_API_URL;
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
+
     setLoading(true);
 
     try {
-      const res = await axios.post(`${API}/auth/login`, { email, password });
+      const res = await axios.post(
+        `${API}/auth/login`,
+        {
+          email,
+          password,
+        }
+      );
 
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("role", res.data.role);
 
-      if (res.data.role === "admin") navigate("/admin");
-      else alert("Not an admin");
+      if (res.data.role === "admin") {
+        navigate("/admin");
+      } else {
+        alert("Not an admin");
+      }
     } catch (err) {
+      console.error("Login failed:", err);
+
       alert("Invalid credentials");
     } finally {
       setLoading(false);
@@ -34,6 +47,7 @@ export default function Login() {
   return (
     <div>
       <Back />
+
       <div className="min-h-screen flex items-center justify-center bg-[#0B0B0B]">
         <motion.div
           initial={{ opacity: 0, y: 60 }}
@@ -49,20 +63,30 @@ export default function Login() {
             Login to manage food orders
           </p>
 
-          <form onSubmit={handleLogin} className="space-y-5">
+          <form
+            onSubmit={handleLogin}
+            className="space-y-5"
+          >
             <input
+              type="email"
+              required
               className="w-full px-4 py-3 rounded-xl bg-black text-white outline-none border border-[#333] focus:border-[#FFC107] transition"
               placeholder="Email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) =>
+                setEmail(e.target.value)
+              }
             />
 
             <input
               type="password"
+              required
               className="w-full px-4 py-3 rounded-xl bg-black text-white outline-none border border-[#333] focus:border-[#FFC107] transition"
               placeholder="Password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) =>
+                setPassword(e.target.value)
+              }
             />
 
             <motion.button
@@ -71,7 +95,9 @@ export default function Login() {
               disabled={loading}
               className="w-full py-3 rounded-xl font-semibold bg-[#E50914] text-white shadow-lg hover:shadow-red-600/40 transition"
             >
-              {loading ? "Logging in..." : "Login"}
+              {loading
+                ? "Logging in..."
+                : "Login"}
             </motion.button>
           </form>
 

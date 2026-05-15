@@ -3,6 +3,8 @@ import axios from "axios";
 import Header from "../components/Header.jsx";
 import Footer from "../components/Footer.jsx";
 
+const API = import.meta.env.VITE_API_URL;
+
 const theme = {
   bg: "#0B0B0B",
   card: "#1A1A1A",
@@ -11,7 +13,6 @@ const theme = {
   text: "#FFFFFF",
   muted: "#B3B3B3",
 };
-const API = `${import.meta.env.VITE_API_URL}/api`;
 
 export default function Contact() {
   const [form, setForm] = useState({
@@ -26,21 +27,33 @@ export default function Contact() {
   const [error, setError] = useState("");
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
+    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     setLoading(true);
     setSuccess("");
     setError("");
 
     try {
       await axios.post(`${API}/contact`, form);
+
       setSuccess("✅ Your query has been submitted!");
-      setForm({ name: "", phone: "", email: "", message: "" });
+
+      setForm({
+        name: "",
+        phone: "",
+        email: "",
+        message: "",
+      });
     } catch (err) {
-      console.error(err);
+      console.error("Contact submit failed:", err);
+
       setError("❌ Failed to submit. Try again.");
     } finally {
       setLoading(false);
@@ -52,7 +65,14 @@ export default function Contact() {
       className="flex flex-col min-h-screen"
       style={{ background: theme.bg }}
     >
-      <Header /> <br /> <br /> <br /> <br /> <br />
+      <Header />
+
+      <br />
+      <br />
+      <br />
+      <br />
+      <br />
+
       <div className="flex items-center justify-center flex-1 px-4">
         <form
           onSubmit={handleSubmit}
@@ -111,8 +131,17 @@ export default function Contact() {
           />
 
           {/* Messages */}
-          {success && <p className="mb-3 text-green-400">{success}</p>}
-          {error && <p className="mb-3 text-red-500">{error}</p>}
+          {success && (
+            <p className="mb-3 text-green-400">
+              {success}
+            </p>
+          )}
+
+          {error && (
+            <p className="mb-3 text-red-500">
+              {error}
+            </p>
+          )}
 
           {/* Submit */}
           <button
@@ -125,6 +154,7 @@ export default function Contact() {
           </button>
         </form>
       </div>
+
       <Footer />
     </div>
   );

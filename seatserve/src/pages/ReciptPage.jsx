@@ -1,15 +1,23 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import {
+  useParams,
+  useNavigate,
+} from "react-router-dom";
+
 import axios from "axios";
 
-const API = `${import.meta.env.VITE_API_URL}/api`;
+const API = import.meta.env.VITE_API_URL;
 
 export default function ReceiptPage() {
   const { id } = useParams();
+
   const navigate = useNavigate();
 
-  const [order, setOrder] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [order, setOrder] =
+    useState(null);
+
+  const [loading, setLoading] =
+    useState(true);
 
   useEffect(() => {
     fetchReceipt();
@@ -17,54 +25,108 @@ export default function ReceiptPage() {
 
   const fetchReceipt = async () => {
     try {
-      const res = await axios.get(`${API}/payment/receipt/${id}`);
+      const res = await axios.get(
+        `${API}/payment/receipt/${id}`
+      );
+
       setOrder(res.data);
+
       setLoading(false);
-    } catch {
+    } catch (err) {
+      console.error(
+        "Receipt fetch failed:",
+        err
+      );
+
       alert("Failed to load receipt");
     }
   };
 
-  if (loading) return <h2 style={loader}>Loading SeatServe receipt...</h2>;
+  if (loading) {
+    return (
+      <h2 style={loader}>
+        Loading SeatServe receipt...
+      </h2>
+    );
+  }
 
   return (
     <div style={page}>
       <div style={card}>
-        <h1 style={title}>🎟 SeatServe Receipt</h1>
+        <h1 style={title}>
+          🎟 SeatServe Receipt
+        </h1>
 
         <p style={sub}>Order ID</p>
-        <p style={idText}>{order._id}</p>
 
-        <div style={paid}>✓ Payment Successful</div>
+        <p style={idText}>
+          {order._id}
+        </p>
+
+        <div style={paid}>
+          ✓ Payment Successful
+        </div>
 
         <section>
-          <h3 style={section}>🎬 Seats</h3>
-          <p style={seatText}>{order.seats.join(", ")}</p>
+          <h3 style={section}>
+            🎬 Seats
+          </h3>
+
+          <p style={seatText}>
+            {order.seats.join(", ")}
+          </p>
         </section>
 
         <section>
-          <h3 style={section}>🍿 Food Items</h3>
+          <h3 style={section}>
+            🍿 Food Items
+          </h3>
 
           {order.items.map((item, i) => (
-            <div key={i} style={{ ...row, animationDelay: `${i * 0.12}s` }}>
+            <div
+              key={i}
+              style={{
+                ...row,
+                animationDelay: `${
+                  i * 0.12
+                }s`,
+              }}
+            >
               <span>
-                {item.name} × {item.quantity}
+                {item.name} ×{" "}
+                {item.quantity}
               </span>
-              <span>₹{item.price * item.quantity}</span>
+
+              <span>
+                ₹
+                {item.price *
+                  item.quantity}
+              </span>
             </div>
           ))}
         </section>
 
-        <div style={totalBox}>₹{order.totalAmount}</div>
+        <div style={totalBox}>
+          ₹{order.totalAmount}
+        </div>
 
         <div style={actions}>
-          <button style={btnPrimary} onClick={() => navigate("/")}>
+          <button
+            style={btnPrimary}
+            onClick={() =>
+              navigate("/")
+            }
+          >
             Home
           </button>
 
           <button
             style={btnTrack}
-            onClick={() => navigate(`/track/${order._id}`)}
+            onClick={() =>
+              navigate(
+                `/track/${order._id}`
+              )
+            }
           >
             Track Order
           </button>
@@ -78,7 +140,8 @@ export default function ReceiptPage() {
 
 const page = {
   minHeight: "100vh",
-  background: "radial-gradient(circle at top, #151515 0%, #000 65%)",
+  background:
+    "radial-gradient(circle at top, #151515 0%, #000 65%)",
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
@@ -91,7 +154,8 @@ const card = {
   padding: 34,
   borderRadius: 22,
   width: 430,
-  boxShadow: "0 0 40px rgba(229,9,20,.6)",
+  boxShadow:
+    "0 0 40px rgba(229,9,20,.6)",
   animation: "slideUp .8s ease",
 };
 
@@ -115,7 +179,8 @@ const idText = {
 };
 
 const paid = {
-  background: "linear-gradient(90deg,#E50914,#ff5252)",
+  background:
+    "linear-gradient(90deg,#E50914,#ff5252)",
   padding: "8px 16px",
   borderRadius: 20,
   textAlign: "center",
@@ -138,7 +203,8 @@ const row = {
   display: "flex",
   justifyContent: "space-between",
   padding: "6px 0",
-  animation: "fadeUp .6s ease forwards",
+  animation:
+    "fadeUp .6s ease forwards",
 };
 
 const totalBox = {
@@ -178,7 +244,6 @@ const loader = {
   textAlign: "center",
   fontSize: 22,
 };
-
 /* ================= ANIMATIONS ================= */
 
 <style>{`
